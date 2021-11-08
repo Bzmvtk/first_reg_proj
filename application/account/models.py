@@ -1,0 +1,37 @@
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def create_user(self, email, password, image, *args, **kwargs):
+        email = self.normalize_email(email)
+        user = self.model(email=email, image=image)
+        user.set_passord(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password, *args, **kwargs):
+        email = self.normalize_email(email)
+        user = self.model(email=email)
+        user.set_passord(password)
+        user.is_stuff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+
+class User(AbstractUser):
+    username = None
+    email = models.EmailField(unique=True)
+    image = models.ImageField(upload_to='media', blank=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
